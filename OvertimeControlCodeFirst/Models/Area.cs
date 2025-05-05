@@ -6,13 +6,12 @@ namespace OvertimeControlCodeFirst.Models
     {
         public int AreaId { get; set; }
 
-        [Required]
-        [MaxLength(100)]
+        [Required, MaxLength(100), MinLength(1), RegularExpression(@"\S+.*", ErrorMessage = "No puede estar vacío")]
         public string Name { get; set; } = string.Empty;
 
         [Required]
         public int SecretariatId { get; set; }
 
-        public Secretariat Secretariat { get; set; } = null!;
+        public required Secretariat Secretariat { get; set; }
     }
 }

@@ -12,7 +12,7 @@
 
         public string IpAddress { get; set; } = string.Empty;
 
-        public virtual User User { get; set; } = null!;
+        public required User User { get; set; }
 
     }
 }
