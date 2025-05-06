@@ -1,0 +1,46 @@
+﻿@model OvertimeControlCodeFirst.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<link rel="stylesheet" href="~/css/login.css" />
+
+<div class="wrapper">
+    <div class="logo">
+        <img src="~/images/logo.png" alt="Logo">
+    </div>
+    <div class="text-center mt-4 name">
+        Control y Gestión de Horas Extras
+    </div>
+    <form class="p-3 mt-3" asp-action="Login" method="post" autocomplete="off">
+        @Html.AntiForgeryToken()
+        <div class="form-field d-flex align-items-center">
+            <span class="far fa-user"></span>
+            <input type="text" id="userName" name="userName" placeholder="Nombre de usuario" required asp-for="UserName" />
+        </div>
+        @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger small" })
+
+        <div class="form-field d-flex align-items-center">
+            <span class="fas fa-key"></span>
+            <input type="password" id="password" name="password" placeholder="Contraseña" required asp-for="Password" />
+        </div>
+        @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger small" })
+
+        <button type="submit" class="btn mt-3">Iniciar sesión</button>
+    </form>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger mt-2">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <p>@error.ErrorMessage</p>
+            }
+        </div>
+    }
+    @* 
+    <div class="text-center fs-6">
+        <a href="#">¿Olvidaste tu contraseña?</a>
+    </div> *@
+</div>

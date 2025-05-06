@@ -10,7 +10,7 @@
 
         public DateTime LogoutDate { get; set; }
 
-        public string IpAddress { get; set; } = string.Empty;
+        public string? IpAddress { get; set; } = string.Empty;
 
         public required User User { get; set; }
 

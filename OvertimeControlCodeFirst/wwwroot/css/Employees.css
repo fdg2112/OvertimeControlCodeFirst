@@ -1,0 +1,192 @@
+﻿body {
+    padding-top: 40px;
+}
+
+.floating-form {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #ecf0f3;
+    padding: 15px;
+    border-radius: 20px;
+    box-shadow: 10px 10px 20px #cbced1, -10px -10px 20px #fff;
+    max-width: 350px;
+    z-index: 9999;
+    font-size: 0.9rem;
+}
+
+    .floating-form h4 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #555;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    .floating-form .form-label {
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 5px;
+    }
+
+    .floating-form .form-control,
+    .floating-form .form-select {
+        font-size: 0.85rem;
+        padding: 8px;
+        border-radius: 20px;
+        box-shadow: inset 4px 4px 8px #cbced1, inset -4px -4px 8px #fff;
+        border: none;
+        background: #ecf0f3;
+        color: #555;
+        outline: none;
+        margin-bottom: 10px;
+    }
+
+    .floating-form button {
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 10px;
+        border-radius: 20px;
+        background-color: #03A9F4;
+        color: #fff;
+        box-shadow: 3px 3px 8px #b1b1b1, -3px -3px 8px #fff;
+        border: none;
+        transition: all 0.2s ease-in-out;
+    }
+
+.hidden {
+    display: none;
+}
+
+
+.sortable {
+    cursor: pointer;
+    background-color: #f8f9fa; /* Color claro */
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    position: relative;
+    user-select: none;
+    font-weight: bold;
+}
+
+    .sortable .sort-icon {
+        font-size: 12px;
+        margin-left: 5px;
+        color: #6c757d;
+        visibility: hidden;
+    }
+
+    .sortable:hover .sort-icon {
+        visibility: visible;
+    }
+
+    .sortable.active {
+        background-color: #e9ecef;
+        color: #000;
+    }
+
+        .sortable.active .sort-icon {
+            visibility: visible;
+        }
+
+            .sortable.active .sort-icon.asc {
+                color: green;
+            }
+
+            .sortable.active .sort-icon.desc {
+                color: red;
+            }
+
+/* Contenedor general */
+.container h3{
+    background: #ecf0f3;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 10px 10px 20px #cbced1, -10px -10px 20px #fff;
+    margin-top: 20px;
+}
+
+/* Títulos */
+h1, h2 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #555;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* Inputs de búsqueda */
+#searchInput {
+    font-size: 0.9rem;
+    padding: 10px;
+    border-radius: 20px;
+    box-shadow: inset 5px 5px 10px #cbced1, inset -5px -5px 10px #fff;
+    border: none;
+    background: #ecf0f3;
+    color: #555;
+    outline: none;
+    margin-bottom: 20px;
+}
+
+/* Tabla */
+.table {
+    background-color: #ecf0f3;
+    border-radius: 15px;
+    box-shadow: 5px 5px 10px #b1b1b1, -5px -5px 10px #fff;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+    .table thead th {
+        background-color: #03A9F4;
+        color: white;
+        font-weight: bold;
+        text-align: left;
+        padding: 15px;
+        font-size: 0.9rem;
+    }
+
+    .table tbody td {
+        padding: 15px;
+        font-size: 0.85rem;
+        color: #555;
+        border-top: 1px solid #ddd;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f7f9fc;
+    }
+
+/* Botones dentro de la tabla */
+.btn-warning {
+    background-color: #ffc107;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    color: #555;
+    box-shadow: 3px 3px 6px #b1b1b1, -3px -3px 6px #fff;
+    border: none;
+}
+
+    .btn-warning:hover {
+        background-color: #e0a800;
+        color: white;
+    }
+
+/* Botones de paginación */
+.pagination-container button {
+    background-color: #03A9F4;
+    border-radius: 20px;
+    color: white;
+    box-shadow: 3px 3px 8px #b1b1b1, -3px -3px 8px #fff;
+    font-size: 0.9rem;
+    border: none;
+    padding: 8px 16px;
+}
+
+    .pagination-container button:hover {
+        background-color: #039BE5;
+    }

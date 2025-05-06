@@ -24,11 +24,11 @@ namespace OvertimeControlCodeFirst.Models
         public int RoleId { get; set; }
         public required Role Role { get; set; }
 
-        public int AreaId { get; set; }
-        public required Area Area { get; set; }
+        public int? AreaId { get; set; }
+        public virtual Area? Area { get; set; }
 
-        public int SecretariatId { get; set; }
-        public required Secretariat Secretariat { get; set; }
+        public int? SecretariatId { get; set; }
+        public virtual Secretariat? Secretariat { get; set; }
 
         public virtual ICollection<LoginAudit> LoginAudits { get; set; } = new List<LoginAudit>();
     }

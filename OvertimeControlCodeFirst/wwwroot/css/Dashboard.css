@@ -1,0 +1,199 @@
+﻿body {
+    padding-top: 70px;
+}
+
+/* Contenedor flotante */
+.floating-form {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #ecf0f3;
+    padding: 15px; /* Reducido */
+    border-radius: 20px;
+    box-shadow: 10px 10px 20px #cbced1, -10px -10px 20px #fff;
+    max-width: 350px;
+    z-index: 9999;
+    font-size: 0.9rem;
+    transition: all 0.3s ease-in-out;
+}
+
+    /* Título del formulario */
+    .floating-form h4 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 1rem; /* Tamaño más pequeño */
+        color: #555;
+        margin-bottom: 10px; /* Menos espacio debajo */
+        text-align: center;
+    }
+
+    /* Etiquetas */
+    .floating-form .form-label {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 500;
+        font-size: 0.85rem; /* Ligera reducción */
+        color: #666;
+        margin-bottom: 5px; /* Espaciado más pequeño */
+    }
+
+    /* Inputs y selects */
+    .floating-form .form-control,
+    .floating-form .form-select {
+        font-size: 0.85rem; /* Ligera reducción */
+        padding: 8px; /* Compacto */
+        border-radius: 15px; /* Menos redondeado */
+        box-shadow: inset 4px 4px 8px #cbced1, inset -4px -4px 8px #fff;
+        border: none;
+        background: #ecf0f3;
+        color: #555;
+        outline: none;
+        margin-bottom: 10px; /* Espaciado reducido entre elementos */
+    }
+
+    /* Botón flotante */
+    .floating-form .btn {
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.85rem; /* Tamaño más pequeño */
+        font-weight: 500;
+        padding: 8px;
+        border-radius: 20px;
+        background-color: #03A9F4;
+        color: #fff;
+        box-shadow: 3px 3px 8px #b1b1b1, -3px -3px 8px #fff;
+        border: none;
+        transition: all 0.2s ease-in-out;
+    }
+
+    /* Botones de acción dentro del formulario */
+    .floating-form .btn-success,
+    .floating-form .btn-secondary {
+        font-size: 0.8rem; /* Más pequeño */
+        padding: 6px 12px; /* Reducido */
+        border-radius: 15px; /* Más compacto */
+        box-shadow: 2px 2px 5px #cbced1, -2px -2px 5px #fff;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .floating-form .btn-success:hover {
+            background-color: #039BE5;
+            color: white;
+        }
+
+        .floating-form .btn-secondary:hover {
+            background-color: #a7aaa7;
+            color: white;
+        }
+
+/* Contenedor del Dashboard */
+.container mt-4{
+    padding: 20px;
+    background-color: #ecf0f3;
+    border-radius: 20px;
+    box-shadow: 10px 10px 20px #cbced1, -10px -10px 20px #fff;
+    margin-top: 20px;
+}
+
+/* Títulos */
+h1, h3 {
+    font-family: 'Poppins', sans-serif;
+    color: #555;
+    text-align: center;
+}
+
+/* Filtros */
+.form-select {
+    border-radius: 15px;
+    box-shadow: inset 5px 5px 10px #cbced1, inset -5px -5px 10px #fff;
+    font-size: 0.9rem;
+}
+
+/* Gráficos */
+canvas {
+    background-color: #f7f9fc;
+    box-shadow: 5px 5px 15px #b1b1b1, -5px -5px 15px #fff;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+/* Tabla */
+.table {
+    background-color: #ecf0f3;
+    border-radius: 10px;
+    box-shadow: 5px 5px 10px #b1b1b1, -5px -5px 10px #fff;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f7f9fc;
+}
+
+.table thead th {
+    background-color: #03A9F4;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Estilo de los encabezados */
+.sortable {
+    cursor: pointer;
+    background-color: #f8f9fa; /* Color claro */
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    position: relative;
+    user-select: none;
+    font-weight: bold;
+}
+
+    /* Ocultar flechas por defecto */
+    .sortable .sort-icon {
+        font-size: 12px;
+        margin-left: 5px;
+        color: #6c757d;
+        visibility: hidden; /* Ocultar inicialmente */
+    }
+
+    /* Mostrar flechas al pasar el mouse */
+    .sortable:hover .sort-icon {
+        visibility: visible;
+    }
+
+    /* Resaltar columna ordenada */
+    .sortable.active {
+        background-color: #e9ecef;
+        color: #000;
+    }
+
+        /* Flechas visibles para la columna activa */
+        .sortable.active .sort-icon {
+            visibility: visible;
+        }
+
+            /* Colores para flechas según dirección */
+            .sortable.active .sort-icon.asc {
+                color: green;
+            }
+
+            .sortable.active .sort-icon.desc {
+                color: red;
+            }
+
+canvas {
+    display: block;
+    margin: 0 auto;
+}
+
+.row > .col-lg-6 {
+    padding: 15px;
+}
+
+@media (max-width: 768px) {
+    canvas {
+        max-width: 100%;
+        height: auto;
+    }
+}
