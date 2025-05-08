@@ -70,8 +70,8 @@ namespace OvertimeControlCodeFirst.Controllers
             var overtimes50 = monthlyHours.FirstOrDefault(h => h.HourType == Enums.HourType.FiftyPercent)?.TotalHours ?? 0;
             var overtimes100 = monthlyHours.FirstOrDefault(h => h.HourType == Enums.HourType.OneHundredPercent)?.TotalHours ?? 0;
             var monthlySpending = await _context.OvertimesExpenseView.ToListAsync();
-            var expense50 = monthlySpending.FirstOrDefault(g => g.HourType.Trim() == Enums.HourType.FiftyPercent)?.TotalExpense ?? 0;
-            var expense100 = monthlySpending.FirstOrDefault(g => g.HourType.Trim() == Enums.HourType.OneHundredPercent)?.TotalExpense ?? 0;
+            var expense50 = monthlySpending.FirstOrDefault(g => g.HourType == Enums.HourType.FiftyPercent)?.TotalExpense ?? 0;
+            var expense100 = monthlySpending.FirstOrDefault(g => g.HourType == Enums.HourType.OneHundredPercent)?.TotalExpense ?? 0;
             var historicalHours = await query
                 .Where(h => h.DateStart >= startDate)
                 .GroupBy(h => new { h.DateStart.Year, h.DateStart.Month, h.HourType })
@@ -93,13 +93,13 @@ namespace OvertimeControlCodeFirst.Controllers
 
             var historicalHours50 = months
                 .Select(m => historicalHours
-                    .Where(h => $"{h.Month:00}/{h.Year}" == m && h.HourType.Trim() == Enums.HourType.FiftyPercent)
+                    .Where(h => $"{h.Month:00}/{h.Year}" == m && h.HourType == Enums.HourType.FiftyPercent)
                     .Sum(h => h.TotalHours))
                 .ToList();
 
             var historicalHours100 = months
                 .Select(m => historicalHours
-                    .Where(h => $"{h.Month:00}/{h.Year}" == m && h.HourType.Trim() == Enums.HourType.OneHundredPercent)
+                    .Where(h => $"{h.Month:00}/{h.Year}" == m && h.HourType == Enums.HourType.OneHundredPercent)
                     .Sum(h => h.TotalHours))
                 .ToList();
 
@@ -129,7 +129,8 @@ namespace OvertimeControlCodeFirst.Controllers
 
             var query = _context.Overtimes
                 .Include(h => h.Employee)
-                .ThenInclude(e => e.SalaryCategory)
+                    .ThenInclude(e => e.SalaryCategory)
+                        .ThenInclude(sc => sc.Values)
                 .Include(h => h.Area)
                 .Include(h => h.Secretariat)
                 .AsQueryable();
@@ -155,7 +156,7 @@ namespace OvertimeControlCodeFirst.Controllers
                 h.HourType,
                 h.HoursQuantity,
                 HourlyRate = h.HourType == Enums.HourType.FiftyPercent
-                    ? (h.Employee.SalaryCategory.SueldoBasico / 132) * 1.5m
+                    ? (h.Employee.SalaryCategory.Values. / 132) * 1.5m
                     : (h.Employee.SalaryCategory.SueldoBasico / 132) * 2m
             }).GroupBy(h => h.HourType).Select(g => new
             {

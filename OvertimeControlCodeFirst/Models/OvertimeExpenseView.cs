@@ -1,8 +1,10 @@
-﻿namespace ControlHorasExtras.Models
+﻿using OvertimeControlCodeFirst.Enums;
+
+namespace ControlHorasExtras.Models
 {
     public class OvertimeExpenseView
     {
-        public string TipoHora { get; set; }
-        public decimal TotalGasto { get; set; }
+        public HourType HourType { get; set; }
+        public decimal TotalExpense { get; set; }
     }
 }
