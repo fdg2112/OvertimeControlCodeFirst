@@ -1,0 +1,202 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    var monthlyHours = ViewData["MonthlyHours"] as int? ?? 0;
+    var monthlyExpenses = ViewData["MonthlyExpenses"] as double? ?? 0.0;
+    var role = User.FindFirst("Role")?.Value;
+}
+
+<!-- Graficos -->
+<div class="container mt-4">
+    <h1>Bienvenido @User.FindFirst("Name")?.Value</h1>
+    <div class="row">
+        <!-- Filtros -->
+        @if (role == "Intendente" || role == "Secretario Hacienda")
+        {
+            <div class="col-md-6">
+                <label for="secretariatFilter">Filtrar por Secretaría:</label>
+                <select id="secretariatFilter" class="form-select">
+                    <option value="">Todas las Secretarías</option>
+                    @foreach (var area in ViewData["Secretariats"] as List<OvertimeControlCodeFirst.Models.Secretariat>)
+                    {
+                        <option value="@area.SecretariatId">@area.Name</option>
+                    }
+                </select>
+            </div>
+        }
+        @if (role == "Secretario" || role == "Intendente" || role == "Secretario Hacienda")
+        {
+            <div class="col-md-6">
+                <label for="areaFilter">Filtrar por Área:</label>
+                <select id="areaFilter" class="form-select">
+                    <option value="">Todas las Áreas</option>
+                    @foreach (var area in ViewData["Areas"] as List<OvertimeControlCodeFirst.Models.Area>)
+                    {
+                        <option value="@area.AreaId">@area.Name</option>
+                    }
+                </select>
+            </div>
+        }
+    </div>
+
+    <div class="row mt-4">
+        <!-- Gráficos principales -->
+        <div class="col-lg-6 col-sm-12">
+            <h3>Horas y Gasto Mensual</h3>
+            <canvas id="overtimesAndExpensivesChart" style="width: 100%; height: auto;"></canvas>
+        </div>
+        <div class="col-lg-6 col-sm-12">
+            <h3>Histórico de Horas por Mes</h3>
+            <canvas id="historicalOvertimesChart" style="width: 100%; height: auto;"></canvas>
+        </div>
+    </div>
+
+    @if (role == "Intendente" || role == "Secretario Hacienda")
+    {
+        <div class="row mt-5">
+            <!-- Gráficos tipo dona -->
+            <div class="col-lg-6 col-sm-12">
+                <h3>Gasto Total por Secretaría</h3>
+                <canvas id="donutSecretariatChart" style="width: 100%; height: auto;"></canvas>
+            </div>
+            <div class="col-lg-6 col-sm-12">
+                <h3>Gasto Total por Área</h3>
+                <canvas id="donutAreaChart" style="width: 100%; height: auto;"></canvas>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Tabla employees con búsqueda y paginación -->
+<div class="container mt-4">
+    <h3>Horas por Empleado</h3>
+    <input type="text" id="searchInput" class="form-control mb-3" placeholder="Buscar employees...">
+    <div class="table-responsive">
+        <table class="table table-striped" id="employeesTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)" class="sortable">
+                        Legajo <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                    <th onclick="sortTable(1)" class="sortable">
+                        Apellido <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                    <th onclick="sortTable(2)" class="sortable">
+                        Nombre <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                    <th onclick="sortTable(3)" class="sortable">
+                        Horas 50% <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                    <th onclick="sortTable(4)" class="sortable">
+                        Horas 100% <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <!-- Filas se agregarán dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-container text-center mt-3">
+        <button class="btn btn-primary" onclick="prevPage()">&#171;</button>
+        <span id="pageInfo"></span>
+        <button class="btn btn-primary" onclick="nextPage()">&#187;</button>
+    </div>
+</div>
+
+<!-- Formulario flotante para cargar horas -->
+@if (role != "Intendente")
+{
+    <div class="floating-form">
+        <button class="btn btn-primary" id="btnUploadHours" onclick="loadForm()">Cargar Horas Extras</button>
+        <form id="formHoras" class="hidden mt-3">
+            @Html.AntiForgeryToken()
+            <h4>Cargar Horas Extras</h4>
+            <!-- Campo de Empleados -->
+            <div class="mb-3">
+                <label for="employee" class="form-label">Empleado</label>
+                <select id="employee" name="EmployeeId" class="form-select" required onchange="actualizarAreaYSecretaria()">
+                    <option value="" selected disabled>Seleccione un empleado</option>
+                    @if (ViewData["Employees"] != null && ViewData["Employees"] is List<OvertimeControlCodeFirst.Models.Employee> employees)
+                    {
+                        foreach (var employee in employees)
+                        {
+                            <option value="@employee.EmployeeId"
+                                    data-area-id="@employee.AreaId"
+                                    data-area-nombre="@employee.Area?.Name"
+                                    data-secretaria-id="@employee.SecretariatId"
+                                    data-secretaria-nombre="@employee.Secretariat?.Name">
+                                @employee.RecordNumber - @employee.Name @employee.LastName
+                            </option>
+                        }
+                    }
+                </select>
+
+            </div>
+            <!-- Campos ocultos para AreaId y SecretariaId -->
+            <input type="hidden" id="areaId" name="AreaId" value="">
+            <input type="hidden" id="secretariatId" name="SecretariatId" value="">
+            <!-- Campo de Secretaría (solo lectura) -->
+            <div class="mb-3">
+                <label for="secretariat" class="form-label">Secretaría</label>
+                <select id="secretariat" class="form-control" disabled>
+                    <option value="">Seleccione un empleado primero</option>
+                </select>
+            </div>
+            <!-- Campo de Área (solo lectura) -->
+            <div class="mb-3">
+                <label for="area" class="form-label">Área</label>
+                <select id="area" class="form-control" disabled>
+                    <option value="">Seleccione un empleado primero</option>
+                </select>
+            </div>
+            <!-- Campo Hora Inicio -->
+            <div class="mb-3">
+                <label for="startDate" class="form-label">Fecha y Hora Inicio</label>
+                <input type="datetime-local" id="startDate" name="startDateHour" class="form-control">
+            </div>
+            <!-- Campo Hora Fin -->
+            <div class="mb-3">
+                <label for="endDate" class="form-label">Fecha y Hora Fin</label>
+                <input type="datetime-local" id="endDate" name="endDateHour" class="form-control">
+            </div>
+            <!-- Campo Tipo Hora -->
+            <div class="mb-3">
+                <label for="hourType" class="form-label">Tipo de Hora</label>
+                <select id="hourType" name="HourType" class="form-control">
+                    <option value="50%">50%</option>
+                    <option value="100%">100%</option>
+                </select>
+            </div>
+            <!-- Botones Guardar y Cerrar -->
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-success">Guardar</button>
+                <button type="button" class="btn btn-secondary" onclick="toggleForm()">Cerrar</button>
+            </div>
+        </form>
+    </div>
+}
+
+<link rel="stylesheet" href="~/css/Dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const UserSecretariatId = @User.FindFirst("SecretariatId")?.Value || null;
+    const UserRole = '@User.FindFirst("Role")?.Value';
+</script>
+
+<script src="~/js/Dashboard.js"></script>
+<script>
+    window.dashboardData = {
+        overtimes50: @Html.Raw(Json.Serialize(ViewData["Overtimes50"] ?? 0)),
+        overtimes100: @Html.Raw(Json.Serialize(ViewData["Overtimes100"] ?? 0)),
+        expense50: @Html.Raw(Json.Serialize(ViewData["Expense50"] ?? 0)),
+        expense100: @Html.Raw(Json.Serialize(ViewData["Expense100"] ?? 0)),
+        months: @Html.Raw(Json.Serialize(ViewData["Months"])),
+        historicalOvertimes50: @Html.Raw(Json.Serialize(ViewData["HistoricalOvertimes50"])),
+        historicalOvertimes100: @Html.Raw(Json.Serialize(ViewData["HistoricalOvertimes100"]))
+    };
+</script>
+

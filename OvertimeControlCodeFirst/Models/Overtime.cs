@@ -6,8 +6,8 @@ namespace OvertimeControlCodeFirst.Models
     {
         public int OvertimeId { get; set; }
         public int EmployeeId { get; set; }
-        public DateTime dateStart { get; set; }
-        public DateTime dateEnd { get; set; }
+        public DateTime DateStart { get; set; }
+        public DateTime DateEnd { get; set; }
         public int HoursQuantity { get; set; }
         public HourType HourType { get; set; }
         public int AreaId { get; set; }

@@ -86,16 +86,16 @@ namespace OvertimeControlCodeFirst.Controllers
         {
             var role= User.FindFirst("Rol")?.Value;
             var areaIdClaim = User.FindFirst("AreaId")?.Value;
-            var secretariaIdClaim = User.FindFirst("SecretariatId")?.Value;
+            var secretariatIdClaim = User.FindFirst("SecretariatId")?.Value;
 
-            int? areaIdUsuario = string.IsNullOrEmpty(areaIdClaim) ? null : int.Parse(areaIdClaim);
-            int? secretariaIdUsuario = string.IsNullOrEmpty(secretariaIdClaim) ? null : int.Parse(secretariaIdClaim);
+            int? areaIdUser = string.IsNullOrEmpty(areaIdClaim) ? null : int.Parse(areaIdClaim);
+            int? secretariaIdUsuario = string.IsNullOrEmpty(secretariatIdClaim) ? null : int.Parse(secretariatIdClaim);
 
             var employeesQuery = _context.Employees.AsQueryable();
 
-            if (role== "Jefe de Área" && areaIdUsuario.HasValue)
+            if (role== "Jefe de Área" && areaIdUser.HasValue)
             {
-                employeesQuery = employeesQuery.Where(e => e.AreaId == areaIdUsuario.Value);
+                employeesQuery = employeesQuery.Where(e => e.AreaId == areaIdUser.Value);
             }
             else if (role== "Secretario" && secretariaIdUsuario.HasValue)
             {
@@ -134,34 +134,34 @@ namespace OvertimeControlCodeFirst.Controllers
         public IActionResult CreateEmployee()
         {
             var areaIdClaim = User.FindFirst("AreaId");
-            var secretariaIdClaim = User.FindFirst("SecretariatId");
+            var secretariatIdClaim = User.FindFirst("SecretariatId");
             var areas = _context.Areas.ToList();
-            var secretarias = _context.Secretariats.ToList();
-            var categorias = _context.SalaryCategories.ToList();
+            var secretariats = _context.Secretariats.ToList();
+            var categories = _context.SalaryCategories.ToList();
 
             int? areaId = areaIdClaim != null && !string.IsNullOrEmpty(areaIdClaim.Value) ? int.Parse(areaIdClaim.Value) : (int?)null;
-            int? secretariaId = secretariaIdClaim != null && !string.IsNullOrEmpty(secretariaIdClaim.Value) ? int.Parse(secretariaIdClaim.Value) : (int?)null;
+            int? secretariatId = secretariatIdClaim != null && !string.IsNullOrEmpty(secretariatIdClaim.Value) ? int.Parse(secretariatIdClaim.Value) : (int?)null;
 
             var employees = _context.Employees
                 .Include(e => e.Area)
                 .Include(e => e.Secretariat)
                 .Include(e => e.SalaryCategory)
-                .Where(e => (areaId.HasValue && e.AreaId == areaId) || (secretariaId.HasValue && e.SecretariatId == secretariaId))
+                .Where(e => (areaId.HasValue && e.AreaId == areaId) || (secretariatId.HasValue && e.SecretariatId == secretariatId))
                 .ToList();
 
             ViewData["Areas"] = areas;
-            ViewData["Secretarias"] = secretarias;
-            ViewData["Categorias"] = categorias;
-            ViewData["Empleados"] = employees;
+            ViewData["Secretaries"] = secretariats;
+            ViewData["Categories"] = categories;
+            ViewData["Employees"] = employees;
 
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateEmployee(Employee empleado)
+        public async Task<IActionResult> CreateEmployee(Employee employee)
         {
-            if (_context.Employees.Any(e => e.RecordNumber == empleado.RecordNumber))
+            if (_context.Employees.Any(e => e.RecordNumber == employee.RecordNumber))
             {
                 return Json(new
                 {
@@ -169,7 +169,7 @@ namespace OvertimeControlCodeFirst.Controllers
                     message = "El número de legajo ya está registrado."
                 });
             }
-            if (empleado.RecordNumber < 0 && empleado.RecordNumber > 999)
+            if (employee.RecordNumber < 0 && employee.RecordNumber > 999)
             {
                 return Json(new
                 {
@@ -184,7 +184,7 @@ namespace OvertimeControlCodeFirst.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Employees.Add(empleado);
+                _context.Employees.Add(employee);
                 await _context.SaveChangesAsync();
                 return Json(new
                 {
@@ -196,15 +196,15 @@ namespace OvertimeControlCodeFirst.Controllers
             return Json(new
             {
                 success = false,
-                message = "Error al registrar el empleado."
+                message = "Error al registrar el employee."
             });
         }
 
         [HttpGet]
-        public IActionResult GetAreasAndSecretarias()
+        public IActionResult GetAreasAndSecretariats()
         {
             var areaIdClaim = User.FindFirst("AreaId");
-            var secretariaIdClaim = User.FindFirst("SecretariatId");
+            var secretariatIdClaim = User.FindFirst("SecretariatId");
 
             int? areaId = null;
             if (areaIdClaim != null && !string.IsNullOrEmpty(areaIdClaim.Value))
@@ -212,59 +212,59 @@ namespace OvertimeControlCodeFirst.Controllers
                 areaId = int.Parse(areaIdClaim.Value);
             }
 
-            if (secretariaIdClaim == null || string.IsNullOrEmpty(secretariaIdClaim.Value))
+            if (secretariatIdClaim == null || string.IsNullOrEmpty(secretariatIdClaim.Value))
             {
                 return Json(new { error = "No se encontró el claim de Secretaría." });
             }
 
-            int secretariaId = int.Parse(secretariaIdClaim.Value);
+            int secretariatId = int.Parse(secretariatIdClaim.Value);
 
             var areas = _context.Areas
-                .Where(a => a.SecretariatId == secretariaId && (!areaId.HasValue || a.AreaId == areaId))
-                .Select(a => new { id = a.AreaId, nombre = a.Name })
+                .Where(a => a.SecretariatId == secretariatId && (!areaId.HasValue || a.AreaId == areaId))
+                .Select(a => new { id = a.AreaId, name = a.Name })
                 .ToList();
 
-            var secretarias = _context.Secretariats
-                .Where(s => s.SecretariatId == secretariaId)
-                .Select(s => new { id = s.SecretariatId, nombre = s.Name })
+            var secretariats = _context.Secretariats
+                .Where(s => s.SecretariatId == secretariatId)
+                .Select(s => new { id = s.SecretariatId, name = s.Name })
                 .ToList();
 
-            var categorias = _context.SalaryCategories
-                .Select(c => new { id = c.SalaryCategoryId, nombre = c.Number })
+            var categories = _context.SalaryCategories
+                .Select(c => new { id = c.SalaryCategoryId, name = c.Number })
                 .ToList();
 
             return Json(new
             {
                 areas,
-                secretarias,
-                categorias,
+                secretariats,
+                categories,
                 defaultAreaId = areaId,
-                defaultSecretariaId = secretariaId
+                defaultSecretariatId = secretariatId
             });
         }
 
         [HttpGet]
-        public IActionResult CheckLegajo(int legajo)
+        public IActionResult CheckRecordNumber(int recordNumber)
         {
-            var empleadoExistente = _context.Employees
+            var existingEmployee = _context.Employees
                 .Include(e => e.Area)
                 .Include(e => e.Secretariat)
-                .Where(e => e.RecordNumber == legajo)
+                .Where(e => e.RecordNumber == recordNumber)
                 .Select(e => new
                 {
                     Name = e.Name,
                     LastName = e.LastName,
-                    AreaNombre = e.Area != null ? e.Area.Name : "Sin Área",
-                    SecretariaNombre = e.Secretariat != null ? e.Secretariat.Name : "Sin Secretaría"
+                    AreaName = e.Area != null ? e.Area.Name : "Sin Área",
+                    SecretariatName = e.Secretariat != null ? e.Secretariat.Name : "Sin Secretaría"
                 })
                 .FirstOrDefault();
 
-            if (empleadoExistente != null)
+            if (existingEmployee != null)
             {
                 return Json(new
                 {
                     exists = true,
-                    empleado = empleadoExistente
+                    employee = existingEmployee
                 });
             }
 
@@ -272,48 +272,48 @@ namespace OvertimeControlCodeFirst.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetEmpleadoById(int id)
+        public IActionResult GetEmployeeById(int id)
         {
-            var empleado = _context.Employees
+            var employee = _context.Employees
                 .Include(e => e.SalaryCategory)
                 .Include(e => e.Area)
                 .Include(e => e.Secretariat)
                 .FirstOrDefault(e => e.EmployeeId == id);
 
-            if (empleado == null)
+            if (employee == null)
             {
                 return NotFound();
             }
-            var categorias = _context.SalaryCategories.Select(c => new { c.SalaryCategoryId, c.Number }).ToList();
+            var categories = _context.SalaryCategories.Select(c => new { c.SalaryCategoryId, c.Number }).ToList();
             var areas = _context.Areas.Select(a => new { a.AreaId, a.Name }).ToList();
-            var secretarias = _context.Secretariats.Select(s => new { s.SecretariatId, s.Name }).ToList();
+            var secretariats = _context.Secretariats.Select(s => new { s.SecretariatId, s.Name }).ToList();
 
             return Json(new
             {
-                nombre = empleado.Name,
-                apellido = empleado.LastName,
-                categoriaId = empleado.SalaryCategoryId,
-                areaId = empleado.AreaId,
-                secretariaId = empleado.SecretariatId,
-                categorias,
+                name = employee.Name,
+                lastname = employee.LastName,
+                categoryId = employee.SalaryCategoryId,
+                areaId = employee.AreaId,
+                secretariatId = employee.SecretariatId,
+                categories,
                 areas,
-                secretarias
+                secretariats
             });
         }
 
         [HttpPost]
-        public IActionResult EditEmpleado(int id, Employee model)
+        public IActionResult EditEmployee(int id, Employee model)
         {
-            var empleado = _context.Employees.FirstOrDefault(e => e.EmployeeId == id);
-            if (empleado == null)
+            var employee = _context.Employees.FirstOrDefault(e => e.EmployeeId == id);
+            if (employee == null)
             {
                 return NotFound();
             }
-            empleado.Name = model.Name;
-            empleado.LastName = model.LastName;
-            empleado.SalaryCategoryId = model.SalaryCategoryId;
-            empleado.AreaId = model.AreaId;
-            empleado.SecretariatId = model.SecretariatId;
+            employee.Name = model.Name;
+            employee.LastName = model.LastName;
+            employee.SalaryCategoryId = model.SalaryCategoryId;
+            employee.AreaId = model.AreaId;
+            employee.SecretariatId = model.SecretariatId;
 
             _context.SaveChanges();
 

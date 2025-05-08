@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ControlHorasExtras.Models;
+using Microsoft.EntityFrameworkCore;
 using OvertimeControlCodeFirst.Models;
 
 namespace OvertimeControlCodeFirst.Data;
@@ -12,6 +13,7 @@ public class OvertimeDbContext : DbContext
     public DbSet<HourLimit> HoursLimit { get; set; }
     public DbSet<LoginAudit> LoginAudits { get; set; }
     public DbSet<Overtime> Overtimes { get; set; }
+    public DbSet<OvertimeExpenseView> OvertimesExpenseView { get; set; }
     public DbSet<Role> Roles { get; set; }    
     public DbSet<SalaryCategory> SalaryCategories { get; set; }
     public DbSet<SalaryCategoryValue> SalaryCategoryValues { get; set; }
