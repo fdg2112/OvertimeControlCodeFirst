@@ -7,7 +7,7 @@
 
 <!-- Graficos -->
 <div class="container mt-4">
-    <h1>Bienvenido @User.FindFirst("Name")?.Value</h1>
+    <h1>Bienvenido @User.FindFirst("FirstName")?.Value</h1>
     <div class="row">
         <!-- Filtros -->
         @if (role == "Intendente" || role == "Secretario Hacienda")
@@ -42,11 +42,11 @@
         <!-- Gráficos principales -->
         <div class="col-lg-6 col-sm-12">
             <h3>Horas y Gasto Mensual</h3>
-            <canvas id="overtimesAndExpensivesChart" style="width: 100%; height: auto;"></canvas>
+            <canvas id="overtimesAndCostChart" style="width: 100%; height: auto;"></canvas>
         </div>
         <div class="col-lg-6 col-sm-12">
             <h3>Histórico de Horas por Mes</h3>
-            <canvas id="historicalOvertimesChart" style="width: 100%; height: auto;"></canvas>
+            <canvas id="historicOvertimesChart" style="width: 100%; height: auto;"></canvas>
         </div>
     </div>
 
@@ -116,7 +116,7 @@
             <!-- Campo de Empleados -->
             <div class="mb-3">
                 <label for="employee" class="form-label">Empleado</label>
-                <select id="employee" name="EmployeeId" class="form-select" required onchange="actualizarAreaYSecretaria()">
+                <select id="employee" name="EmployeeId" class="form-select" required onchange="updateAreaAndSecretariat()">
                     <option value="" selected disabled>Seleccione un empleado</option>
                     @if (ViewData["Employees"] != null && ViewData["Employees"] is List<OvertimeControlCodeFirst.Models.Employee> employees)
                     {
@@ -178,6 +178,7 @@
     </div>
 }
 
+
 <link rel="stylesheet" href="~/css/Dashboard.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
@@ -199,4 +200,5 @@
         historicalOvertimes100: @Html.Raw(Json.Serialize(ViewData["HistoricalOvertimes100"]))
     };
 </script>
+
 

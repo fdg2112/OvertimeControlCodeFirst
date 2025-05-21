@@ -136,7 +136,7 @@ if (formHours) {
 
 // GRAFICOS
 document.addEventListener('DOMContentLoaded', () => {
-    const { overtimes50, overtimes100, overtimes50cost, overtimes100cost, months, historicOvertimes50, historicOvertimes100 } = window.dashboardData;
+    const { overtimes50, overtimes100, expense50, expense100, months, historicalOvertimes50, historicalOvertimes100 } = window.dashboardData;
     let overtimesAndCostChart, historicOvertimesChart;
 
     function initCharts() {
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     {
                         label: 'Gasto Mensual',
-                        data: [overtimes50cost, overtimes100cost],
+                        data: [expense50, expense100],
                         backgroundColor: ['rgba(135, 206, 250, 0.8)'], // Azul claro y celeste
                         yAxisID: 'y-gasto',
                     }
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'y-gasto': {
                         type: 'linear',
                         position: 'right',
-                        suggestedMax: Math.max(overtimes50cost, overtimes100cost) * 1.1, // Extiende un 10% por encima del máximo
+                        suggestedMax: Math.max(expense50, expense100) * 1.1, // Extiende un 10% por encima del máximo
                         title: {
                             display: true,
                             text: 'Gasto ($)',
@@ -195,7 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         align: 'top',
                         formatter: (value, ctx) => {
                             if (ctx.dataset.label === 'Gasto Mensual') {
-                                return `$${value.toLocaleString('es-AR')}`;
+                                return value !== undefined && value !== null
+                                    ? `$${value.toLocaleString('es-AR')}`
+                                    : '';
                             }
                             return value;
                         },
@@ -215,8 +217,8 @@ document.addEventListener('DOMContentLoaded', () => {
             data: {
                 labels: months,
                 datasets: [
-                    { label: 'Horas 50%', data: historicOvertimes50, borderColor: 'rgba(75, 192, 192, 1)', backgroundColor: 'rgba(75, 192, 192, 0.2)', fill: true },
-                    { label: 'Horas 100%', data: historicOvertimes100, borderColor: 'rgba(255, 99, 132, 1)', backgroundColor: 'rgba(255, 99, 132, 0.2)', fill: true }
+                    { label: 'Horas 50%', data: historicalOvertimes50, borderColor: 'rgba(75, 192, 192, 1)', backgroundColor: 'rgba(75, 192, 192, 0.2)', fill: true },
+                    { label: 'Horas 100%', data: historicalOvertimes100, borderColor: 'rgba(255, 99, 132, 1)', backgroundColor: 'rgba(255, 99, 132, 0.2)', fill: true }
                 ]
             },
             options: { responsive: true, aspectRatio: 1.75 }
@@ -226,16 +228,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCharts(data) {
         const overtimes50 = parseFloat(data.overtimes50) || 0;
         const overtimes100 = parseFloat(data.overtimes100) || 0;
-        const overtimes50cost = parseFloat(data.overtimes50cost) || 0;
-        const overtimes100cost = parseFloat(data.overtimes100cost) || 0;
-        const historico50 = data.historico50.map(h => parseFloat(h) || 0);
-        const historico100 = data.historico100.map(h => parseFloat(h) || 0);
+        const expense50 = parseFloat(data.expense50) || 0;
+        const expense100 = parseFloat(data.expense100) || 0;
+        const historical50 = data.historical50.map(h => parseFloat(h) || 0);
+        const historical100 = data.historical100.map(h => parseFloat(h) || 0);
 
         overtimesAndCostChart.data.datasets[0].data = [overtimes50, overtimes100]; // Actualizar las horas
-        overtimesAndCostChart.data.datasets[1].data = [overtimes50cost, overtimes100cost]; // Actualizar el gasto
+        overtimesAndCostChart.data.datasets[1].data = [expense50, expense100]; // Actualizar el gasto
         overtimesAndCostChart.update();
-        historicOvertimesChart.data.datasets[0].data = historico50;
-        historicOvertimesChart.data.datasets[1].data = historico100;
+        historicOvertimesChart.data.datasets[0].data = historical50;
+        historicOvertimesChart.data.datasets[1].data = historical100;
         historicOvertimesChart.update();
     }
 

@@ -8,7 +8,7 @@ namespace OvertimeControlCodeFirst.Models
 
         [Range(1, 10)]
         public int Number { get; set; }
-        public virtual ICollection<SalaryCategoryValue> Values { get; set; } = new List<SalaryCategoryValue>();
+        public virtual ICollection<SalaryCategoryValue> SalaryCategoryValues { get; set; } = new List<SalaryCategoryValue>();
 
     }
 }

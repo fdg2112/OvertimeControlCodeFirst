@@ -4,10 +4,12 @@ using OvertimeControlCodeFirst.Data;
 using Microsoft.AspNetCore.Authorization;
 using OvertimeControlCodeFirst.Models;
 using System.Globalization;
+using OvertimeControlCodeFirst.Helpers;
+using OvertimeControlCodeFirst.Enums;
 
 namespace OvertimeControlCodeFirst.Controllers
 {
-    [Authorize] 
+    [Authorize]
     public class DashboardController : Controller
     {
         private readonly OvertimeDbContext _context;
@@ -16,6 +18,7 @@ namespace OvertimeControlCodeFirst.Controllers
         {
             _context = context;
         }
+
         public async Task<IActionResult> Index()
         {
             var userIdClaim = User.FindFirst("UserId");
@@ -66,12 +69,13 @@ namespace OvertimeControlCodeFirst.Controllers
                     TotalHours = g.Sum(h => h.HoursQuantity)
                 })
                 .ToListAsync();
-
             var overtimes50 = monthlyHours.FirstOrDefault(h => h.HourType == Enums.HourType.FiftyPercent)?.TotalHours ?? 0;
             var overtimes100 = monthlyHours.FirstOrDefault(h => h.HourType == Enums.HourType.OneHundredPercent)?.TotalHours ?? 0;
-            var monthlySpending = await _context.OvertimesExpenseView.ToListAsync();
-            var expense50 = monthlySpending.FirstOrDefault(g => g.HourType == Enums.HourType.FiftyPercent)?.TotalExpense ?? 0;
-            var expense100 = monthlySpending.FirstOrDefault(g => g.HourType == Enums.HourType.OneHundredPercent)?.TotalExpense ?? 0;
+            
+            var monthlyExpense = await _context.OvertimeExpenseView.ToListAsync();
+            var expense50 = monthlyExpense.FirstOrDefault(h => h.HourType == Enums.HourType.FiftyPercent)?.TotalExpense ?? 0;
+            var expense100 = monthlyExpense.FirstOrDefault(h => h.HourType == Enums.HourType.OneHundredPercent)?.TotalExpense ?? 0;
+            
             var historicalHours = await query
                 .Where(h => h.DateStart >= startDate)
                 .GroupBy(h => new { h.DateStart.Year, h.DateStart.Month, h.HourType })
@@ -91,13 +95,13 @@ namespace OvertimeControlCodeFirst.Controllers
                 .Distinct()
                 .ToList();
 
-            var historicalHours50 = months
+            var historicalOvertimes50 = months
                 .Select(m => historicalHours
                     .Where(h => $"{h.Month:00}/{h.Year}" == m && h.HourType == Enums.HourType.FiftyPercent)
                     .Sum(h => h.TotalHours))
                 .ToList();
 
-            var historicalHours100 = months
+            var historicalOvertimes100 = months
                 .Select(m => historicalHours
                     .Where(h => $"{h.Month:00}/{h.Year}" == m && h.HourType == Enums.HourType.OneHundredPercent)
                     .Sum(h => h.TotalHours))
@@ -113,8 +117,8 @@ namespace OvertimeControlCodeFirst.Controllers
             ViewData["Expense50"] = Math.Round(expense50, 2);
             ViewData["Expense100"] = Math.Round(expense100, 2);
             ViewData["Months"] = months;
-            ViewData["HistoricalHours50"] = historicalHours50;
-            ViewData["HistoricalHours100"] = historicalHours100;
+            ViewData["HistoricalOvertimes50"] = historicalOvertimes50;
+            ViewData["HistoricalOvertimes100"] = historicalOvertimes100;
             ViewData["TotalExpenseFormatted"] = (expense50 + expense100).ToString("C", new CultureInfo("es-AR"));
 
             return View();
@@ -130,7 +134,7 @@ namespace OvertimeControlCodeFirst.Controllers
             var query = _context.Overtimes
                 .Include(h => h.Employee)
                     .ThenInclude(e => e.SalaryCategory)
-                        .ThenInclude(sc => sc.Values)
+                        .ThenInclude(sc => sc.SalaryCategoryValues)
                 .Include(h => h.Area)
                 .Include(h => h.Secretariat)
                 .AsQueryable();
@@ -151,18 +155,22 @@ namespace OvertimeControlCodeFirst.Controllers
                 TotalHours = g.Sum(h => h.HoursQuantity)
             }).ToListAsync();
 
-            var expenses = await query.Select(h => new
-            {
-                h.HourType,
-                h.HoursQuantity,
-                HourlyRate = h.HourType == Enums.HourType.FiftyPercent
-                    ? (h.Employee.SalaryCategory.Values. / 132) * 1.5m
-                    : (h.Employee.SalaryCategory.SueldoBasico / 132) * 2m
-            }).GroupBy(h => h.HourType).Select(g => new
-            {
-                HourType = g.Key,
-                TotalExpense = g.Sum(h => h.HoursQuantity * h.HourlyRate)
-            }).ToListAsync();
+            var expenses = await query
+                .Select(h => new
+                {
+                    h.HourType,
+                    h.HoursQuantity,
+                    BaseSalary = SalaryHelper.GetValidBaseSalary(h.Employee.SalaryCategory.SalaryCategoryValues, currentMonth, currentYear)
+                })
+                .GroupBy(h => h.HourType)
+                .Select(g => new
+                {
+                    HourType = g.Key,
+                    TotalExpense = g.Sum(h => h.HoursQuantity * ((h.HourType == Enums.HourType.FiftyPercent
+                        ? (h.BaseSalary / 132) * 1.5m
+                        : (h.BaseSalary / 132) * 2m)))
+                }).ToListAsync();
+
 
             var historicalQuery = _context.Overtimes
                 .Include(h => h.Employee)
@@ -211,42 +219,52 @@ namespace OvertimeControlCodeFirst.Controllers
             });
         }
 
+
         [HttpGet]
         public async Task<IActionResult> GetDonutChartData()
         {
-            var query = _context.Overtimes
-                .Include(h => h.Employee)
-                .ThenInclude(e => e.SalaryCategory)
-                .Include(h => h.Area)
-                .Include(h => h.Secretariat)
-                .AsQueryable();
-
             var currentMonth = DateTime.Now.Month;
             var currentYear = DateTime.Now.Year;
 
-            query = query.Where(h => h.DateStart.Month == currentMonth && h.DateStart.Year == currentYear);
+            var overtimes = await _context.Overtimes
+                .Include(h => h.Employee)
+                    .ThenInclude(e => e.SalaryCategory)
+                        .ThenInclude(c => c.SalaryCategoryValues)
+                .Include(h => h.Area)
+                .Include(h => h.Secretariat)
+                .Where(h => h.DateStart.Month == currentMonth && h.DateStart.Year == currentYear)
+                .ToListAsync();
 
-            var expenseBySecretariat = await query
-                .GroupBy(h => h.Secretariat.Name)
+            var processed = overtimes.Select(h =>
+            {
+                var baseSalary = SalaryHelper.GetValidBaseSalary(h.Employee.SalaryCategory.SalaryCategoryValues, currentMonth, currentYear);
+                var hourlyRate = (baseSalary / 132) * (h.HourType == Enums.HourType.FiftyPercent ? 1.5m : 2m);
+                return new
+                {
+                    h.HoursQuantity,
+                    HourlyRate = hourlyRate,
+                    Area = h.Area?.Name ?? "Sin área",
+                    Secretariat = h.Secretariat?.Name ?? "Sin secretaría"
+                };
+            });
+
+            var expenseBySecretariat = processed
+                .GroupBy(h => h.Secretariat)
                 .Select(g => new
                 {
                     Secretariat = g.Key,
-                    TotalExpense = g.Sum(h => h.HoursQuantity * (h.HourType == Enums.HourType.FiftyPercent
-                        ? (h.Employee.SalaryCategory.SueldoBasico / 132) * 1.5m
-                        : (h.Employee.SalaryCategory.SueldoBasico / 132) * 2m))
+                    TotalExpense = g.Sum(x => x.HoursQuantity * x.HourlyRate)
                 })
-                .ToListAsync();
+                .ToList();
 
-            var expenseByArea = await query
-                .GroupBy(h => h.Area.Name)
+            var expenseByArea = processed
+                .GroupBy(h => h.Area)
                 .Select(g => new
                 {
                     Area = g.Key,
-                    TotalExpense = g.Sum(h => h.HoursQuantity * (h.HourType == Enums.HourType.FiftyPercent
-                        ? (h.Employee.SalaryCategory.SueldoBasico / 132) * 1.5m
-                        : (h.Employee.SalaryCategory.SueldoBasico / 132) * 2m))
+                    TotalExpense = g.Sum(x => x.HoursQuantity * x.HourlyRate)
                 })
-                .ToListAsync();
+                .ToList();
 
             return Json(new
             {
@@ -344,34 +362,47 @@ namespace OvertimeControlCodeFirst.Controllers
             var query = _context.Overtimes
                 .Include(h => h.Employee)
                     .ThenInclude(e => e.SalaryCategory)
-                        .ThenInclude(sc => sc.SalaryCategoryValue)
+                        .ThenInclude(sc => sc.SalaryCategoryValues)
                 .Include(h => h.Area)
                 .Include(h => h.Secretariat)
                 .AsQueryable();
 
             var expenseBySecretariat = await query
-                .GroupBy(h => h.Secretariat.Name)
+                .Select(h => new
+                {
+                    h.Secretariat.Name,
+                    h.HourType,
+                    h.HoursQuantity,
+                    BaseSalary = SalaryHelper.GetValidBaseSalary(h.Employee.SalaryCategory.SalaryCategoryValues, currentMonth, currentYear)
+                })
+                .GroupBy(h => h.Name)
                 .Select(g => new
                 {
                     Secretariat = g.Key,
-                    TotalExpense = g.Sum(h => h.HoursQuantity *
-                        (h.HourType == Enums.HourType.FiftyPercent
-                            ? (h.Employee.SalaryCategory.SueldoBasico / 132) * 1.5m
-                            : (h.Employee.SalaryCategory.SueldoBasico / 132) * 2m))
+                    TotalExpense = g.Sum(h => h.HoursQuantity * ((h.HourType == Enums.HourType.FiftyPercent
+                        ? (h.BaseSalary / 132) * 1.5m
+                        : (h.BaseSalary / 132) * 2m)))
                 })
                 .ToListAsync();
 
             var expenseByArea = await query
-                .GroupBy(h => h.Area.Name)
+                .Select(h => new
+                {
+                    h.Area.Name,
+                    h.HourType,
+                    h.HoursQuantity,
+                    BaseSalary = SalaryHelper.GetValidBaseSalary(h.Employee.SalaryCategory.SalaryCategoryValues, currentMonth, currentYear)
+                })
+                .GroupBy(h => h.Name)
                 .Select(g => new
                 {
                     Area = g.Key,
-                    TotalExpense = g.Sum(h => h.HoursQuantity *
-                        (h.HourType == Enums.HourType.FiftyPercent
-                            ? (h.Employee.SalaryCategory.SueldoBasico / 132) * 1.5m
-                            : (h.Employee.SalaryCategory.SueldoBasico / 132) * 2m))
+                    TotalExpense = g.Sum(h => h.HoursQuantity * ((h.HourType == Enums.HourType.FiftyPercent
+                        ? (h.BaseSalary / 132) * 1.5m
+                        : (h.BaseSalary / 132) * 2m)))
                 })
                 .ToListAsync();
+
 
             return Json(new
             {
@@ -379,6 +410,5 @@ namespace OvertimeControlCodeFirst.Controllers
                 ExpenseByArea = expenseByArea
             });
         }
-
     }
 }
