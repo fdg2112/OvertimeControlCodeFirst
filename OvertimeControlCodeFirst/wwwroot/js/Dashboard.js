@@ -242,12 +242,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleFilters() {
-        const secretariaFilter = document.getElementById('secretariaFilter');
+        const secretariatFilter = document.getElementById('secretariatFilter');
         const areaFilter = document.getElementById('areaFilter');
 
-        secretariaFilter?.addEventListener('change', () => {
-            const secretariatId = secretariaFilter.value;
-            fetch(`/Dashboard/GetAreasBySecretaria?secretariatId=${secretariatId}`)
+        secretariatFilter?.addEventListener('change', () => {
+            const secretariatId = secretariatFilter.value;
+            fetch(`/Dashboard/GetAreasBySecretariat?secretariatId=${secretariatId}`)
                 .then(response => response.json())
                 .then(areas => {
                     areaFilter.innerHTML = '<option value="">Todas las áreas</option>';
@@ -263,16 +263,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function fetchChartData() {
         const areaId = document.getElementById('areaFilter')?.value || '';
-        const secretariatId = document.getElementById('secretariaFilter')?.value || ''; // Secretaría seleccionada (o ninguna)
+        const secretariatId = document.getElementById('secretariatFilter')?.value || ''; // Secretaría seleccionada (o ninguna)
 
         if (!areaId && !secretariatId) {
-            if (UserRol === "Intendente" || UserRol === "Secretario Hacienda") {
+            if (UserRole === "Intendente" || UserRole === "Secretario Hacienda") {
                 fetch(`/Dashboard/GetChartData`)
                     .then(response => response.json())
                     .then(updateCharts)
                     .catch(error => console.error('Error al cargar los datos del gráfico:', error));
-            } else if (UserRol === "Secretario") {
-                fetch(`/Dashboard/GetChartData?secretariatId=${UserSecretariaId}`)
+            } else if (UserRole === "Secretario") {
+                fetch(`/Dashboard/GetChartData?secretariatId=${UserSecretariatId}`)
                     .then(response => response.json())
                     .then(updateCharts)
                     .catch(error => console.error('Error al cargar los datos del gráfico:', error));
@@ -353,8 +353,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (ctxAreaElement) {
                     const ctxArea = ctxAreaElement.getContext('2d');
-                    const areas = data.expensesByArea.map(a => a.area);
-                    const areasExpenses = data.expensesByArea.map(a => a.totalExpense);
+                    const areas = data.expenseByArea.map(a => a.area);
+                    const areasExpenses = data.expenseByArea.map(a => a.totalExpense);
 
                     donutAreaChart = new Chart(ctxArea, {
                         type: 'doughnut',

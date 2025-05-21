@@ -110,7 +110,7 @@
 {
     <div class="floating-form">
         <button class="btn btn-primary" id="btnUploadHours" onclick="loadForm()">Cargar Horas Extras</button>
-        <form id="formHoras" class="hidden mt-3">
+        <form id="formHours" class="hidden mt-3">
             @Html.AntiForgeryToken()
             <h4>Cargar Horas Extras</h4>
             <!-- Campo de Empleados -->
@@ -184,7 +184,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    const UserSecretariatId = @User.FindFirst("SecretariatId")?.Value || null;
+    const UserSecretariatId = @User.FindFirst("UserSecretariatId")?.Value || null;
     const UserRole = '@User.FindFirst("Role")?.Value';
 </script>
 

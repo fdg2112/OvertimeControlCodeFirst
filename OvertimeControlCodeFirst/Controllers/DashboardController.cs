@@ -287,7 +287,7 @@ namespace OvertimeControlCodeFirst.Controllers
         [HttpGet]
         public async Task<IActionResult> GetEmployeesByArea(int? areaId = null)
         {
-            var role = User.FindFirst("Rol")?.Value;
+            var role = User.FindFirst("Role")?.Value;
             var areaIdClaim = User.FindFirst("AreaId")?.Value;
             var secretariatIdClaim = User.FindFirst("SecretariatId")?.Value;
 
