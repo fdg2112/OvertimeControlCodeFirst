@@ -15,9 +15,7 @@
 
     function fetchEmployees() {
         const areaId = document.getElementById('areaFilter')?.value || '';
-
-        // CORRECCIÓN: Cambiar GetEmpleados por GetEmployy
-        fetch(`/Employee/GetEmployy?areaId=${areaId}`)
+        fetch(`/Employee/GetEmployee?areaId=${areaId}`)
             .then(response => response.json())
             .then(data => {
                 console.log(data);
@@ -172,7 +170,6 @@ if (formEmployee) {
             return;
         }
 
-        // CORRECCIÓN: Cambiar CheckLegajo por CheckRecordNumber
         fetch(`/Employee/CheckRecordNumber?recordNumber=${legajoInput}`)
             .then(response => {
                 if (!response.ok) {
@@ -246,9 +243,6 @@ function toggleForm() {
     formEmployee.classList.toggle('hidden');
     btnAddEmployee.classList.toggle('hidden');
 }
-
-// CORRECCIÓN: Cambiar cargarFormulario por loadForm en la vista
-window.cargarFormulario = loadForm;
 
 // Editar datos de un employee
 function editEmployee(employeeId) {
