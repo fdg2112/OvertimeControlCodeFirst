@@ -65,14 +65,18 @@ namespace OvertimeControlCodeFirst.Controllers
                 .Select(a => new { id = a.AreaId, nombre = a.Name })
                 .ToList();
 
+            var activities = _context.WorkActivities
+                .Select(a => new { a.WorkActivityId, a.Name })
+                .ToList();
+
             return Json(new
             {
                 employees,
                 secretariats,
-                areas
+                areas,
+                activities
             });
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -80,7 +84,9 @@ namespace OvertimeControlCodeFirst.Controllers
         {
             ModelState.Remove("Area");
             ModelState.Remove("Secretariat");
-            ModelState.Remove("Empleado");
+            ModelState.Remove("Employee");
+            ModelState.Remove("WorkActivity");
+            ModelState.Remove("HourType");
 
             if (overtime.DateStart >= overtime.DateEnd)
             {
@@ -100,7 +106,7 @@ namespace OvertimeControlCodeFirst.Controllers
 
                 if (employee == null)
                 {
-                    return Json(new { success = false, message = "El employee seleccionado no existe." });
+                    return Json(new { success = false, message = "El empleado seleccionado no existe." });
                 }
 
                 overtime.AreaId = employee.AreaId ?? 0; 

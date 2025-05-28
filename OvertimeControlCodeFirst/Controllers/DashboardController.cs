@@ -111,6 +111,18 @@ namespace OvertimeControlCodeFirst.Controllers
                 .Where(a => role == "Secretario" ? a.SecretariatId == secretariatId : true)
                 .ToListAsync();
 
+            var activities = await _context.WorkActivities.ToListAsync();
+
+            var employees = await _context.Employees
+                .Include(e => e.Area)
+                .Include(e => e.Secretariat)
+                .Where(e =>
+                    (areaId.HasValue && e.AreaId == areaId) ||
+                    (!areaId.HasValue && e.SecretariatId == secretariatId))
+                .ToListAsync();
+
+            ViewData["WorkActivities"] = activities;
+            ViewData["Employees"] = employees;
             ViewData["Areas"] = areas;
             ViewData["Overtimes50"] = overtimes50;
             ViewData["Overtimes100"] = overtimes100;
@@ -120,6 +132,8 @@ namespace OvertimeControlCodeFirst.Controllers
             ViewData["HistoricalOvertimes50"] = historicalOvertimes50;
             ViewData["HistoricalOvertimes100"] = historicalOvertimes100;
             ViewData["TotalExpenseFormatted"] = (expense50 + expense100).ToString("C", new CultureInfo("es-AR"));
+
+
 
             return View();
         }

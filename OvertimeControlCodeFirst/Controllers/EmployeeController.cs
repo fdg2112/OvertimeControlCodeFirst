@@ -82,7 +82,7 @@ namespace OvertimeControlCodeFirst.Controllers
             return View();
         }
 
-        public async Task<IActionResult> GetEmployy(int? areaId = null)
+        public async Task<IActionResult> GetEmployee(int? areaId = null)
         {
             var role= User.FindFirst("Rol")?.Value;
             var areaIdClaim = User.FindFirst("AreaId")?.Value;

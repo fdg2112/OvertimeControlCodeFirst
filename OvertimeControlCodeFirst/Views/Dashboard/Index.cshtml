@@ -151,22 +151,33 @@
                     <option value="">Seleccione un empleado primero</option>
                 </select>
             </div>
+            <!-- Actividad de trabajo -->
+            <div class="mb-3">
+                <label for="WorkActivityId" class="form-label">Actividad realizada</label>
+                <select id="WorkActivityId" name="WorkActivityId" class="form-control" required>
+                    <option value="">Seleccione una actividad</option>
+                    @foreach (var activity in (List<WorkActivity>)ViewData["WorkActivities"])
+                    {
+                      <option value="@activity.WorkActivityId">@activity.Name</option>
+                    }
+                </select>
+            </div>
+
             <!-- Campo Hora Inicio -->
             <div class="mb-3">
                 <label for="startDate" class="form-label">Fecha y Hora Inicio</label>
-                <input type="datetime-local" id="startDate" name="startDateHour" class="form-control">
+                <input type="datetime-local" id="startDate" name="DateStart" class="form-control">
             </div>
             <!-- Campo Hora Fin -->
             <div class="mb-3">
                 <label for="endDate" class="form-label">Fecha y Hora Fin</label>
-                <input type="datetime-local" id="endDate" name="endDateHour" class="form-control">
+                <input type="datetime-local" id="endDate" name="DateEnd" class="form-control">
             </div>
             <!-- Campo Tipo Hora -->
             <div class="mb-3">
-                <label for="hourType" class="form-label">Tipo de Hora</label>
                 <select id="hourType" name="HourType" class="form-control">
-                    <option value="50%">50%</option>
-                    <option value="100%">100%</option>
+                    <option value="50">50%</option>
+                    <option value="100">100%</option>
                 </select>
             </div>
             <!-- Botones Guardar y Cerrar -->

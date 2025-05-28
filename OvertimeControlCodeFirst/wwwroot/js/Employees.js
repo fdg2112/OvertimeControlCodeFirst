@@ -16,7 +16,8 @@
     function fetchEmployees() {
         const areaId = document.getElementById('areaFilter')?.value || '';
 
-        fetch(`/Employee/GetEmpleados?areaId=${areaId}`)
+        // CORRECCIÓN: Cambiar GetEmpleados por GetEmployy
+        fetch(`/Employee/GetEmployy?areaId=${areaId}`)
             .then(response => response.json())
             .then(data => {
                 console.log(data);
@@ -155,6 +156,7 @@ if (formEmployee) {
                 });
             });
     });
+
     document.getElementById("recordNumber").addEventListener("blur", function () {
         const legajoInput = this.value;
 
@@ -170,8 +172,8 @@ if (formEmployee) {
             return;
         }
 
-        // Verificar si el recordNumber ya existe en la base de datos
-        fetch(`/Employee/CheckLegajo?recordNumber=${legajoInput}`)
+        // CORRECCIÓN: Cambiar CheckLegajo por CheckRecordNumber
+        fetch(`/Employee/CheckRecordNumber?recordNumber=${legajoInput}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
@@ -184,9 +186,9 @@ if (formEmployee) {
                         title: "Legajo ya registrado",
                         html: `
                         <p>El legajo ingresado pertenece a:</p>
-                        <p><strong>${data.employee.name} ${data.employee.lastName}</strong></p>
-                        <p>Área: ${data.employee.areaName}</p>
-                        <p>Secretaría: ${data.employee.secretariatName}</p>
+                        <p><strong>${data.employee.Name} ${data.employee.LastName}</strong></p>
+                        <p>Área: ${data.employee.AreaName}</p>
+                        <p>Secretaría: ${data.employee.SecretariatName}</p>
                         <p>Para agregar a este empleado tu área, debes solicitar la transferencia a su superior.</p>
                     `,
                         icon: "warning",
@@ -198,6 +200,7 @@ if (formEmployee) {
             .catch(error => console.error("Error al verificar el legajo:", error));
     });
 }
+
 function loadForm() {
     formEmployee.classList.toggle("hidden");
     btnAddEmployee.classList.toggle("hidden");
@@ -212,6 +215,7 @@ function loadForm() {
             .catch((error) => console.error("Error al cargar las opciones:", error));
     }
 }
+
 function loadOptionsWithSelection(data) {
     // Cargar áreas
     const areaSelect = document.getElementById("areaId");
@@ -221,10 +225,10 @@ function loadOptionsWithSelection(data) {
         areaSelect.innerHTML += `<option value="${area.id}" ${selected}>${area.name}</option>`;
     });
 
-    // Cargar secretarías
+    // CORRECCIÓN: Cambiar secretarias por secretariats
     const secretariatSelect = document.getElementById("secretariatId");
     secretariatSelect.innerHTML = '<option value="" disabled>Seleccione una secretaría</option>';
-    data.secretarias.forEach((secretariat) => {
+    data.secretariats.forEach((secretariat) => {
         const selected = data.defaultSecretariatId === secretariat.id ? "selected" : "";
         secretariatSelect.innerHTML += `<option value="${secretariat.id}" ${selected}>${secretariat.name}</option>`;
     });
@@ -242,6 +246,9 @@ function toggleForm() {
     formEmployee.classList.toggle('hidden');
     btnAddEmployee.classList.toggle('hidden');
 }
+
+// CORRECCIÓN: Cambiar cargarFormulario por loadForm en la vista
+window.cargarFormulario = loadForm;
 
 // Editar datos de un employee
 function editEmployee(employeeId) {
@@ -263,14 +270,14 @@ function editEmployee(employeeId) {
                     </div>
                     <div class="mb-3">
                         <label for="lastName" class="form-label">Apellido</label>
-                        <input type="text" class="form-control" id="lastName" name="LastName" value="${data.lastName}" required>
+                        <input type="text" class="form-control" id="lastName" name="LastName" value="${data.lastname}" required>
                     </div>
                     <div class="mb-3">
                         <label for="categoryId" class="form-label">Categoría Salarial</label>
-                        <select class="form-select" id="categoryId" name="CategoryId" required>
+                        <select class="form-select" id="categoryId" name="SalaryCategoryId" required>
                             ${data.categories.map(c => `
-                                <option value="${c.categoryId}" ${c.categoryId === data.categoryId ? "selected" : ""}>
-                                    ${c.numberCategory}
+                                <option value="${c.SalaryCategoryId}" ${c.SalaryCategoryId === data.categoryId ? "selected" : ""}>
+                                    ${c.Number}
                                 </option>`).join("")}
                         </select>
                     </div>
@@ -278,17 +285,17 @@ function editEmployee(employeeId) {
                         <label for="areaId" class="form-label">Área</label>
                         <select class="form-select" id="areaId" name="AreaId" required>
                             ${data.areas.map(a => `
-                                <option value="${a.areaId}" ${a.areaId === data.areaId ? "selected" : ""}>
-                                    ${a.areaName}
+                                <option value="${a.AreaId}" ${a.AreaId === data.areaId ? "selected" : ""}>
+                                    ${a.Name}
                                 </option>`).join("")}
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="secretariatId" class="form-label">Secretaría</label>
                         <select class="form-select" id="secretariatId" name="SecretariatId" required>
-                            ${data.secretarias.map(s => `
-                                <option value="${s.secretariaId}" ${s.secretariaId === data.secretariaId ? "selected" : ""}>
-                                    ${s.secretariatName}
+                            ${data.secretariats.map(s => `
+                                <option value="${s.SecretariatId}" ${s.SecretariatId === data.secretariatId ? "selected" : ""}>
+                                    ${s.Name}
                                 </option>`).join("")}
                         </select>
                     </div>
@@ -345,4 +352,3 @@ function editEmployee(employeeId) {
             });
         });
 }
-

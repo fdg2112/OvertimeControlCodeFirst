@@ -2,7 +2,7 @@
     ViewData["Title"] = "Gestión de Empleados";
     var employees = ViewData["Employees"] as List<OvertimeControlCodeFirst.Models.Employee>;
     var categorias = ViewData["Categories"] as List<OvertimeControlCodeFirst.Models.SalaryCategory>;
-    var role= User.FindFirst("Role")?.Value;
+    var role = User.FindFirst("Role")?.Value;
 }
 
 <h1>Empleados en tu Área y Secretaría</h1>
@@ -27,7 +27,7 @@
                     <th onclick="sortTable(4)" class="sortable">
                         Área <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
                     </th>
-                    <th onclick="sortTable(4)" class="sortable">
+                    <th onclick="sortTable(5)" class="sortable">
                         Secretaría <span class="sort-icon">&#9650;</span><span class="sort-icon">&#9660;</span>
                     </th>
                     <th>Acciones</th>
@@ -45,7 +45,7 @@
                         <td>@empleado.Area?.Name</td>
                         <td>@empleado.Secretariat?.Name</td>
                         <td>
-                            <button class="btn btn-warning btn-sm" onclick="editEmployee(${emp.empleadoId})">Editar</button>
+                            <button class="btn btn-warning btn-sm" onclick="editEmployee(@empleado.EmployeeId)">Editar</button>
                         </td>
                     </tr>
                 }
@@ -63,7 +63,7 @@
 @if (role != "Intendente")
 {
     <div class="floating-form">
-        <button class="btn btn-primary" id="btnAddEmployee" onclick="cargarFormulario()">Agregar Empleado</button>
+        <button class="btn btn-primary" id="btnAddEmployee" onclick="loadForm()">Agregar Empleado</button>
         <form id="formEmployee" class="hidden mt-3">
             @Html.AntiForgeryToken()
             <h4>Agregar Nuevo Empleado</h4>
@@ -81,7 +81,7 @@
             </div>
             <div class="mb-3">
                 <label for="categoryId" class="form-label">Categoría Salarial</label>
-                <select class="form-select" id="categoryId" name="CategoryId" required>
+                <select class="form-select" id="categoryId" name="SalaryCategoryId" required>
                     <option value="" selected disabled>Seleccione una Categoria</option>
                 </select>
             </div>
@@ -102,7 +102,6 @@
         </form>
     </div>
 }
-
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

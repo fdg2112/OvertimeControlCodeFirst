@@ -18,15 +18,15 @@ function loadForm() {
 function loadFormOptions(data) {
     const employeeSelect = document.getElementById('employee');
     employeeSelect.innerHTML = '<option value="" selected disabled>Seleccione un empleado</option>';
-    data.employees.forEach(employee => {
-        employeeSelect.innerHTML += `
-                <option value="${employee.employeeId}"
-                        data-area-id="${employee.areaId}"
-                        data-area-name="${employee.areaName}"
-                        data-secretariat-id="${employee.secretariatId}"
-                        data-secretariat-name="${employee.secretariatName}">
-                    ${employee.recordNumber} - ${employee.name} ${employee.lastName}
-                </option>`;
+    data.employees.forEach(emp => {
+        const option = document.createElement('option');
+        option.value = emp.employeeId;
+        option.textContent = `${emp.recordNumber} - ${emp.lastName} ${emp.name}`;
+        option.setAttribute('data-area-id', emp.areaId);
+        option.setAttribute('data-area-name', emp.areaNombre);
+        option.setAttribute('data-secretariat-id', emp.secretariatId);
+        option.setAttribute('data-secretariat-name', emp.secretariaNombre);
+        employeeSelect.appendChild(option);
     });
 }
 
