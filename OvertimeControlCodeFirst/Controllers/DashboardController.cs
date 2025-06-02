@@ -69,9 +69,9 @@ namespace OvertimeControlCodeFirst.Controllers
                     TotalHours = g.Sum(h => h.HoursQuantity)
                 })
                 .ToListAsync();
+
             var overtimes50 = monthlyHours.FirstOrDefault(h => h.HourType == Enums.HourType.FiftyPercent)?.TotalHours ?? 0;
             var overtimes100 = monthlyHours.FirstOrDefault(h => h.HourType == Enums.HourType.OneHundredPercent)?.TotalHours ?? 0;
-            
             var monthlyExpense = await _context.OvertimeExpenseView.ToListAsync();
             var expense50 = monthlyExpense.FirstOrDefault(h => h.HourType == Enums.HourType.FiftyPercent)?.TotalExpense ?? 0;
             var expense100 = monthlyExpense.FirstOrDefault(h => h.HourType == Enums.HourType.OneHundredPercent)?.TotalExpense ?? 0;
@@ -133,8 +133,6 @@ namespace OvertimeControlCodeFirst.Controllers
             ViewData["HistoricalOvertimes100"] = historicalOvertimes100;
             ViewData["TotalExpenseFormatted"] = (expense50 + expense100).ToString("C", new CultureInfo("es-AR"));
 
-
-
             return View();
         }
 
@@ -169,7 +167,8 @@ namespace OvertimeControlCodeFirst.Controllers
                 TotalHours = g.Sum(h => h.HoursQuantity)
             }).ToListAsync();
 
-            var expenses = await query
+            var expenses = query
+                .AsEnumerable()
                 .Select(h => new
                 {
                     h.HourType,
@@ -183,8 +182,8 @@ namespace OvertimeControlCodeFirst.Controllers
                     TotalExpense = g.Sum(h => h.HoursQuantity * ((h.HourType == Enums.HourType.FiftyPercent
                         ? (h.BaseSalary / 132) * 1.5m
                         : (h.BaseSalary / 132) * 2m)))
-                }).ToListAsync();
-
+                })
+                .ToList();
 
             var historicalQuery = _context.Overtimes
                 .Include(h => h.Employee)

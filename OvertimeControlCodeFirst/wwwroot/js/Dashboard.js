@@ -140,6 +140,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let overtimesAndCostChart, historicOvertimesChart;
 
     function initCharts() {
+        console.log("UserRole:", UserRole);
+        console.log("UserSecretariatId:", UserSecretariatId);
         const ctx = document.getElementById('overtimesAndCostChart').getContext('2d');
         overtimesAndCostChart = new Chart(ctx, {
             type: 'bar',
@@ -262,6 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function fetchChartData() {
+        console.log("UserRole:", UserRole);
+        console.log("UserSecretariatId:", UserSecretariatId);
+
         const areaId = document.getElementById('areaFilter')?.value || '';
         const secretariatId = document.getElementById('secretariatFilter')?.value || ''; // Secretaría seleccionada (o ninguna)
 
@@ -289,8 +294,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 .catch(error => console.error('Error al cargar los datos del gráfico:', error));
         }
     }
+
     initCharts();
     handleFilters();
+    fetchChartData();
 });
 
 document.addEventListener('DOMContentLoaded', () => {

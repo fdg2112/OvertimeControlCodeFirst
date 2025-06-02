@@ -284,9 +284,17 @@ namespace OvertimeControlCodeFirst.Controllers
             {
                 return NotFound();
             }
-            var categories = _context.SalaryCategories.Select(c => new { c.SalaryCategoryId, c.Number }).ToList();
-            var areas = _context.Areas.Select(a => new { a.AreaId, a.Name }).ToList();
-            var secretariats = _context.Secretariats.Select(s => new { s.SecretariatId, s.Name }).ToList();
+            var categories = _context.SalaryCategories
+                .Select(c => new { salaryCategoryId = c.SalaryCategoryId, number = c.Number })
+                .ToList();
+
+            var areas = _context.Areas
+                .Select(a => new { areaId = a.AreaId, name = a.Name, secretariatId = a.SecretariatId })
+                .ToList();
+
+            var secretariats = _context.Secretariats
+                .Select(s => new { secretariatId = s.SecretariatId, name = s.Name })
+                .ToList();
 
             return Json(new
             {
@@ -315,7 +323,15 @@ namespace OvertimeControlCodeFirst.Controllers
             employee.AreaId = model.AreaId;
             employee.SecretariatId = model.SecretariatId;
 
-            _context.SaveChanges();
+            _context.Employees
+            .Where(e => e.EmployeeId == id)
+            .ExecuteUpdate(setters => setters
+                .SetProperty(e => e.Name, model.Name)
+                .SetProperty(e => e.LastName, model.LastName)
+                .SetProperty(e => e.SalaryCategoryId, model.SalaryCategoryId)
+                .SetProperty(e => e.AreaId, model.AreaId)
+                .SetProperty(e => e.SecretariatId, model.SecretariatId)
+            );
 
             return Json(new { success = true, message = "Empleado actualizado correctamente" });
         }

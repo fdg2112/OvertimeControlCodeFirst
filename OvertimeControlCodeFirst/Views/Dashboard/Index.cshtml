@@ -195,8 +195,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    const UserSecretariatId = @User.FindFirst("UserSecretariatId")?.Value || null;
-    const UserRole = '@User.FindFirst("Role")?.Value';
+    const UserSecretariatId = '@User.FindFirst("SecretariatId")?.Value' || '';
+    const UserRole = '@User.FindFirst("Role")?.Value' || '';
 </script>
 
 <script src="~/js/Dashboard.js"></script>

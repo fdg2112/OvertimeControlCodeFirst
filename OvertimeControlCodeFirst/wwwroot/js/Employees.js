@@ -222,7 +222,6 @@ function loadOptionsWithSelection(data) {
         areaSelect.innerHTML += `<option value="${area.id}" ${selected}>${area.name}</option>`;
     });
 
-    // CORRECCIÓN: Cambiar secretarias por secretariats
     const secretariatSelect = document.getElementById("secretariatId");
     secretariatSelect.innerHTML = '<option value="" disabled>Seleccione una secretaría</option>';
     data.secretariats.forEach((secretariat) => {
@@ -270,8 +269,8 @@ function editEmployee(employeeId) {
                         <label for="categoryId" class="form-label">Categoría Salarial</label>
                         <select class="form-select" id="categoryId" name="SalaryCategoryId" required>
                             ${data.categories.map(c => `
-                                <option value="${c.SalaryCategoryId}" ${c.SalaryCategoryId === data.categoryId ? "selected" : ""}>
-                                    ${c.Number}
+                                <option value="${c.salaryCategoryId}" ${c.salaryCategoryId === data.categoryId ? "selected" : ""}>
+                                    ${c.number}
                                 </option>`).join("")}
                         </select>
                     </div>
@@ -279,8 +278,8 @@ function editEmployee(employeeId) {
                         <label for="areaId" class="form-label">Área</label>
                         <select class="form-select" id="areaId" name="AreaId" required>
                             ${data.areas.map(a => `
-                                <option value="${a.AreaId}" ${a.AreaId === data.areaId ? "selected" : ""}>
-                                    ${a.Name}
+                                <option value="${a.areaId}" ${a.areaId === data.areaId ? "selected" : ""}>
+                                    ${a.name}
                                 </option>`).join("")}
                         </select>
                     </div>
@@ -288,8 +287,8 @@ function editEmployee(employeeId) {
                         <label for="secretariatId" class="form-label">Secretaría</label>
                         <select class="form-select" id="secretariatId" name="SecretariatId" required>
                             ${data.secretariats.map(s => `
-                                <option value="${s.SecretariatId}" ${s.SecretariatId === data.secretariatId ? "selected" : ""}>
-                                    ${s.Name}
+                                <option value="${s.secretariatId}" ${s.secretariatId === data.secretariatId ? "selected" : ""}>
+                                    ${s.name}
                                 </option>`).join("")}
                         </select>
                     </div>
