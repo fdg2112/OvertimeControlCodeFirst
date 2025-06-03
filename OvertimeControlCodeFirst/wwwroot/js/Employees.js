@@ -275,20 +275,20 @@ function editEmployee(employeeId) {
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="areaId" class="form-label">Área</label>
-                        <select class="form-select" id="areaId" name="AreaId" required>
-                            ${data.areas.map(a => `
-                                <option value="${a.areaId}" ${a.areaId === data.areaId ? "selected" : ""}>
-                                    ${a.name}
-                                </option>`).join("")}
-                        </select>
-                    </div>
-                    <div class="mb-3">
                         <label for="secretariatId" class="form-label">Secretaría</label>
                         <select class="form-select" id="secretariatId" name="SecretariatId" required>
                             ${data.secretariats.map(s => `
                                 <option value="${s.secretariatId}" ${s.secretariatId === data.secretariatId ? "selected" : ""}>
                                     ${s.name}
+                                </option>`).join("")}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="areaId" class="form-label">Área</label>
+                        <select class="form-select" id="areaId" name="AreaId" required>
+                            ${data.areas.map(a => `
+                                <option value="${a.areaId}" ${a.areaId === data.areaId ? "selected" : ""}>
+                                    ${a.name}
                                 </option>`).join("")}
                         </select>
                     </div>

@@ -244,6 +244,19 @@ namespace OvertimeControlCodeFirst.Controllers
         }
 
         [HttpGet]
+        public IActionResult GetAreasBySecretariat(int secretariatId)
+        {
+            var areas = _context.Areas
+                .Where(a => a.SecretariatId == secretariatId)
+                .Select(a => new { a.AreaId, a.Name })
+                .ToList();
+
+            return Json(areas);
+        }
+
+
+
+        [HttpGet]
         public IActionResult CheckRecordNumber(int recordNumber)
         {
             var existingEmployee = _context.Employees
