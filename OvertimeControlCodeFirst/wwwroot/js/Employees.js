@@ -244,6 +244,7 @@ function toggleForm() {
 }
 
 // Editar datos de un employee
+// Editar datos de un employee
 function editEmployee(employeeId) {
     // Obtener los datos del employee desde el servidor
     fetch(`/Employee/GetEmployeeById?id=${employeeId}`)
@@ -254,6 +255,9 @@ function editEmployee(employeeId) {
             return response.json();
         })
         .then(data => {
+            // Filtrar las áreas que pertenecen a la secretaría seleccionada inicialmente
+            const filteredAreas = data.areas.filter(a => a.secretariatId === data.secretariatId);
+
             // Generar formulario pre-cargado
             const formHtml = `
                 <form id="formEmployeeEdit">
@@ -276,7 +280,7 @@ function editEmployee(employeeId) {
                     </div>
                     <div class="mb-3">
                         <label for="secretariatId" class="form-label">Secretaría</label>
-                        <select class="form-select" id="secretariatId" name="SecretariatId" required>
+                        <select class="form-select" id="secretariatIdEdit" name="SecretariatId" required>
                             ${data.secretariats.map(s => `
                                 <option value="${s.secretariatId}" ${s.secretariatId === data.secretariatId ? "selected" : ""}>
                                     ${s.name}
@@ -285,8 +289,8 @@ function editEmployee(employeeId) {
                     </div>
                     <div class="mb-3">
                         <label for="areaId" class="form-label">Área</label>
-                        <select class="form-select" id="areaId" name="AreaId" required>
-                            ${data.areas.map(a => `
+                        <select class="form-select" id="areaIdEdit" name="AreaId" required>
+                            ${filteredAreas.map(a => `
                                 <option value="${a.areaId}" ${a.areaId === data.areaId ? "selected" : ""}>
                                     ${a.name}
                                 </option>`).join("")}
@@ -301,6 +305,24 @@ function editEmployee(employeeId) {
                 html: formHtml,
                 showCancelButton: true,
                 confirmButtonText: "Guardar",
+                didOpen: () => {
+                    // Agregar evento al cambio de secretaría para filtrar áreas
+                    const secretariatSelect = document.getElementById('secretariatIdEdit');
+                    const areaSelect = document.getElementById('areaIdEdit');
+
+                    secretariatSelect.addEventListener('change', function () {
+                        const selectedSecretariatId = parseInt(this.value);
+
+                        // Filtrar áreas por secretaría seleccionada
+                        const areasForSecretariat = data.areas.filter(a => a.secretariatId === selectedSecretariatId);
+
+                        // Limpiar y repoblar el select de áreas
+                        areaSelect.innerHTML = '<option value="" disabled selected>Seleccione un área</option>';
+                        areasForSecretariat.forEach(area => {
+                            areaSelect.innerHTML += `<option value="${area.areaId}">${area.name}</option>`;
+                        });
+                    });
+                },
                 preConfirm: () => {
                     // Obtener datos del formulario
                     const form = document.getElementById("formEmployeeEdit");
