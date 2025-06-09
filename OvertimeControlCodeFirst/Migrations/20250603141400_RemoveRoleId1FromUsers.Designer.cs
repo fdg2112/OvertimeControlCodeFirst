@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OvertimeControlCodeFirst.Data;
 
@@ -11,9 +12,11 @@ using OvertimeControlCodeFirst.Data;
 namespace OvertimeControlCodeFirst.Migrations
 {
     [DbContext(typeof(OvertimeDbContext))]
-    partial class OvertimeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250603141400_RemoveRoleId1FromUsers")]
+    partial class RemoveRoleId1FromUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

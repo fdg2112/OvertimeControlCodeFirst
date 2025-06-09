@@ -39,6 +39,8 @@ namespace OvertimeControlCodeFirst.Controllers
             IQueryable<Overtime> query = _context.Overtimes
                 .Include(h => h.Area)
                 .Include(h => h.Employee)
+                    .ThenInclude(e => e.SalaryCategory)
+                        .ThenInclude(sc => sc.SalaryCategoryValues)
                 .Include(h => h.Secretariat)
                 .AsQueryable();
 
@@ -72,7 +74,25 @@ namespace OvertimeControlCodeFirst.Controllers
 
             var overtimes50 = monthlyHours.FirstOrDefault(h => h.HourType == Enums.HourType.FiftyPercent)?.TotalHours ?? 0;
             var overtimes100 = monthlyHours.FirstOrDefault(h => h.HourType == Enums.HourType.OneHundredPercent)?.TotalHours ?? 0;
-            var monthlyExpense = await _context.OvertimeExpenseView.ToListAsync();
+
+            var monthlyExpense = query
+                .Where(h => h.DateStart.Month == currentMonth && h.DateStart.Year == currentYear)
+                .AsEnumerable()
+                .Select(h => new
+                {
+                    h.HourType,
+                    h.HoursQuantity,
+                    BaseSalary = SalaryHelper.GetValidBaseSalary(h.Employee.SalaryCategory.SalaryCategoryValues, currentMonth, currentYear)
+                })
+                .GroupBy(h => h.HourType)
+                .Select(g => new
+                {
+                    HourType = g.Key,
+                    TotalExpense = g.Sum(h => h.HoursQuantity * ((h.HourType == Enums.HourType.FiftyPercent ? (h.BaseSalary / 132) * 1.5m : (h.BaseSalary / 132) * 2m)))
+                })
+                .ToList();
+
+
             var expense50 = monthlyExpense.FirstOrDefault(h => h.HourType == Enums.HourType.FiftyPercent)?.TotalExpense ?? 0;
             var expense100 = monthlyExpense.FirstOrDefault(h => h.HourType == Enums.HourType.OneHundredPercent)?.TotalExpense ?? 0;
             
@@ -139,6 +159,21 @@ namespace OvertimeControlCodeFirst.Controllers
         [HttpGet]
         public async Task<IActionResult> GetChartData(int? areaId = null, int? secretariatId = null)
         {
+            // Obtener información del usuario logueado
+            var userIdClaim = User.FindFirst("UserId");
+            var roleClaim = User.FindFirst("Role");
+            var areaIdClaim = User.FindFirst("AreaId");
+            var secretariatIdClaim = User.FindFirst("SecretariatId");
+
+            if (userIdClaim == null || roleClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            var role = roleClaim.Value;
+            int? userAreaId = string.IsNullOrEmpty(areaIdClaim?.Value) ? null : int.Parse(areaIdClaim.Value);
+            int? userSecretariatId = string.IsNullOrEmpty(secretariatIdClaim?.Value) ? null : int.Parse(secretariatIdClaim.Value);
+
             var currentMonth = DateTime.Now.Month;
             var currentYear = DateTime.Now.Year;
             var startDate = new DateTime(currentYear, currentMonth, 1).AddMonths(-11);
@@ -151,14 +186,37 @@ namespace OvertimeControlCodeFirst.Controllers
                 .Include(h => h.Secretariat)
                 .AsQueryable();
 
-            if (areaId.HasValue)
+            // Aplicar filtros según el rol del usuario
+            if (role == "Jefe de Área" && userAreaId.HasValue)
             {
-                query = query.Where(h => h.AreaId == areaId.Value);
+                // Para Jefe de Área, siempre filtrar por su área
+                query = query.Where(h => h.AreaId == userAreaId.Value);
             }
-            else if (secretariatId.HasValue)
+            else if (role == "Secretario" && userSecretariatId.HasValue)
             {
-                query = query.Where(h => h.SecretariatId == secretariatId.Value);
+                // Para Secretario, filtrar por su secretaría
+                query = query.Where(h => h.SecretariatId == userSecretariatId.Value);
+
+                // Si se especifica un área en particular, filtrar también por área
+                if (areaId.HasValue)
+                {
+                    query = query.Where(h => h.AreaId == areaId.Value);
+                }
             }
+            else if (role == "Intendente" || role == "Secretario Hacienda")
+            {
+                // Para roles superiores, aplicar filtros opcionales
+                if (areaId.HasValue)
+                {
+                    query = query.Where(h => h.AreaId == areaId.Value);
+                }
+                else if (secretariatId.HasValue)
+                {
+                    query = query.Where(h => h.SecretariatId == secretariatId.Value);
+                }
+            }
+
+            // Filtrar por mes actual
             query = query.Where(h => h.DateStart.Month == currentMonth && h.DateStart.Year == currentYear);
 
             var hours = await query.GroupBy(h => h.HourType).Select(g => new
@@ -185,18 +243,36 @@ namespace OvertimeControlCodeFirst.Controllers
                 })
                 .ToList();
 
+            // Query para datos históricos
             var historicalQuery = _context.Overtimes
                 .Include(h => h.Employee)
                 .Include(h => h.Area)
                 .AsQueryable();
 
-            if (areaId.HasValue)
+            // Aplicar los mismos filtros de rol para datos históricos
+            if (role == "Jefe de Área" && userAreaId.HasValue)
             {
-                historicalQuery = historicalQuery.Where(h => h.AreaId == areaId.Value);
+                historicalQuery = historicalQuery.Where(h => h.AreaId == userAreaId.Value);
             }
-            else if (secretariatId.HasValue)
+            else if (role == "Secretario" && userSecretariatId.HasValue)
             {
-                historicalQuery = historicalQuery.Where(h => h.SecretariatId == secretariatId.Value);
+                historicalQuery = historicalQuery.Where(h => h.SecretariatId == userSecretariatId.Value);
+
+                if (areaId.HasValue)
+                {
+                    historicalQuery = historicalQuery.Where(h => h.AreaId == areaId.Value);
+                }
+            }
+            else if (role == "Intendente" || role == "Secretario Hacienda")
+            {
+                if (areaId.HasValue)
+                {
+                    historicalQuery = historicalQuery.Where(h => h.AreaId == areaId.Value);
+                }
+                else if (secretariatId.HasValue)
+                {
+                    historicalQuery = historicalQuery.Where(h => h.SecretariatId == secretariatId.Value);
+                }
             }
 
             var historical = await historicalQuery
@@ -231,8 +307,6 @@ namespace OvertimeControlCodeFirst.Controllers
                 Historical100 = historical100
             });
         }
-
-
         [HttpGet]
         public async Task<IActionResult> GetDonutChartData()
         {

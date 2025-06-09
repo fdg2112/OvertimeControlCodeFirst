@@ -42,6 +42,29 @@ namespace OvertimeControlCodeFirst.Controllers
                 ViewData["CurrentPage"] = page;
                 ViewData["PageSize"] = pageSize;
             }
+            else if (rolClaim?.Value == "Secretario Hacienda")
+            {
+                var employees = _context.Employees
+                    .Include(e => e.Area)
+                    .Include(e => e.Secretariat)
+                    .Include(e => e.SalaryCategory)
+                    .Where(e => e.SecretariatId == 3)
+                    .ToList();
+
+                // Paginación
+                var totalEmployees = employees.Count();
+                var paginatedEmployees = employees
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                var totalPages = (int)Math.Ceiling((double)totalEmployees / pageSize);
+
+                ViewData["Employees"] = paginatedEmployees;
+                ViewData["TotalPages"] = totalPages;
+                ViewData["CurrentPage"] = page;
+                ViewData["PageSize"] = pageSize;
+            }
             else
             {
                 int? areaId = null;
@@ -93,11 +116,11 @@ namespace OvertimeControlCodeFirst.Controllers
 
             var employeesQuery = _context.Employees.AsQueryable();
 
-            if (role== "Jefe de Área" && areaIdUser.HasValue)
+            if (role == "Jefe de Área" && areaIdUser.HasValue)
             {
                 employeesQuery = employeesQuery.Where(e => e.AreaId == areaIdUser.Value);
             }
-            else if (role== "Secretario" && secretariaIdUsuario.HasValue)
+            else if (role == "Secretario" && secretariaIdUsuario.HasValue)
             {
                 employeesQuery = employeesQuery.Where(e => e.Area.SecretariatId == secretariaIdUsuario.Value);
                 if (areaId.HasValue)
@@ -105,9 +128,13 @@ namespace OvertimeControlCodeFirst.Controllers
                     employeesQuery = employeesQuery.Where(e => e.AreaId == areaId.Value);
                 }
             }
-            else if (role== "Intendente" || role== "Secretario Hacienda")
+            else if (role == "Secretario Hacienda")
             {
-                // Intendentes y Secretarios de Hacienda no tienen filtro inicial por ahora
+                employeesQuery = employeesQuery.Where(e => e.SecretariatId == 3);
+                if (areaId.HasValue)
+                {
+                    employeesQuery = employeesQuery.Where(e => e.AreaId == areaId.Value);
+                }
             }
             else if (areaId.HasValue)
             {

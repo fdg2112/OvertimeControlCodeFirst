@@ -142,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initCharts() {
         console.log("UserRole:", UserRole);
         console.log("UserSecretariatId:", UserSecretariatId);
+        console.log("UserAreaId:", UserAreaId);
         const ctx = document.getElementById('overtimesAndCostChart').getContext('2d');
         overtimesAndCostChart = new Chart(ctx, {
             type: 'bar',
@@ -278,6 +279,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     .catch(error => console.error('Error al cargar los datos del gráfico:', error));
             } else if (UserRole === "Secretario") {
                 fetch(`/Dashboard/GetChartData?secretariatId=${UserSecretariatId}`)
+                    .then(response => response.json())
+                    .then(updateCharts)
+                    .catch(error => console.error('Error al cargar los datos del gráfico:', error));
+            } else if (UserRole === "Jefe de Área") {
+                fetch(`/Dashboard/GetChartData?areaId=${UserAreaId}`)
                     .then(response => response.json())
                     .then(updateCharts)
                     .catch(error => console.error('Error al cargar los datos del gráfico:', error));
